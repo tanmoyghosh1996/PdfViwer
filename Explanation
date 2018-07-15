@@ -1,0 +1,66 @@
+Add Library in manifest :
+
+implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
+
+
+Add in Xml Page :
+
+        <com.github.barteksc.pdfviewer.PDFView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/pdfview">
+
+        </com.github.barteksc.pdfviewer.PDFView>
+        
+        
+ Add in Activity :
+ 
+ public class ShowResult extends BaseActivity  {
+
+    String result1;
+    PDFView pdfview;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_scoreresult);
+        
+        /*Bundle bundle = getIntent().getExtras();
+        if (null != bundle) {
+            result1 = bundle.getString("result").replace("\\/\\/", "\\/");
+
+        }*/
+        
+        pdfview = (PDFView)findViewById(R.id.pdfview);
+        new RetrivePdf().execute(result1);      //result1 is the url which you want to view in pdf
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
+    }
+
+    class RetrivePdf extends AsyncTask<String, Void, InputStream>{
+
+        @Override
+        protected InputStream doInBackground(String... strings) {
+            InputStream inputStream = null;
+            try{
+                URL url = new URL(strings[0]);
+                HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
+                if(httpURLConnection.getResponseCode()==200){
+                    inputStream = new BufferedInputStream(httpURLConnection.getInputStream());
+                }
+            }
+            catch (IOException e){
+                return null;
+            }
+            return inputStream;
+        }
+
+        @Override
+        protected void onPostExecute(InputStream inputStream) {
+            pdfview.fromStream(inputStream).load();
+        }
+    }
+}
